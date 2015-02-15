@@ -1587,6 +1587,7 @@ self =>
      *                  |  SimpleExpr `.' Id
      *                  |  SimpleExpr TypeArgs
      *                  |  SimpleExpr1 ArgumentExprs
+     *                  |  SimpleExpr1 `#' [`(' ??? `)']
      *  }}}
      */
     def simpleExpr(): Tree = {
@@ -1637,6 +1638,25 @@ self =>
             case _ =>
               t1
           }
+        case HASH if (canApply) =>
+          val macroParserArgs = new ListBuffer[String]
+          while(in.token == HASH) {
+            in.nextToken()
+            val endToken = in.token match {
+              case LPAREN => RPAREN
+              case LBRACE => RBRACE
+              case other  => syntaxErrorOrIncompleteAnd(s"'(' or '{' expected but ${token2string(other)} found.", skipIt = true)(ERROR)
+            }
+            in.nextToken()
+            val start = in.offset
+            while(in.token != endToken && in.token != ERROR && in.token != EOF) {
+              in.nextToken()
+            }
+            val end = in.offset
+            macroParserArgs += in.buf.slice(start, end).mkString("")
+            accept(endToken)
+          }
+          t updateAttachment macroParserArgs.toList
         case LPAREN | LBRACE if (canApply) =>
           val app = atPos(t.pos.start, in.offset) {
             // look for anonymous function application like (f _)(x) and
