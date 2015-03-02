@@ -1656,7 +1656,7 @@ self =>
             macroParserArgs += in.buf.slice(start, end).mkString("")
             accept(endToken)
           }
-          t updateAttachment macroParserArgs.toList
+          t updateAttachment ParserMacroArgumentsAttachment(macroParserArgs.toList)
         case LPAREN | LBRACE if (canApply) =>
           val app = atPos(t.pos.start, in.offset) {
             // look for anonymous function application like (f _)(x) and

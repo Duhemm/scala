@@ -42,6 +42,10 @@ trait StdAttachments {
    */
   case object BackquotedIdentifierAttachment extends PlainAttachment
 
+  case class ParserMacroArgumentsAttachment(arguments: List[String]) extends ImportableAttachment {
+    def importAttachment(importer: Importer) = this
+  }
+
   /** Identifies trees are either result or intermediate value of for loop desugaring.
    */
   case object ForAttachment extends PlainAttachment
